@@ -3,19 +3,20 @@ package com.example.notepadmvcpattern.viewer
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
-import android.webkit.WebChromeClient.FileChooserParams
 import android.widget.EditText
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.ui.AppBarConfiguration
-import com.example.notepadmvcpattern.R
 import com.example.notepadmvcpattern.controller.Controller
+import com.example.notepadmvcpattern.utils.FileUtils.getUri
 import com.example.notepadmvcpattern.utils.GetFileActivityResultContract
 import com.example.notepadmvcpattern.utils.PermissionUtil
 import com.example.notepadmvcpattern.utils.PermissionUtil.LOCATION_REQUEST_CODE
+import com.example.notepadmvcpattern.utils.getPath
 import com.google.android.material.navigation.NavigationView
 
 
@@ -26,8 +27,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var titleName: EditText
     private var controller: Controller
-    private lateinit var chooser: FileChooserParams
-    private val result = registerForActivityResult(GetFileActivityResultContract()){}
+    private val result = registerForActivityResult(GetFileActivityResultContract()){
+//        Toast.makeText(this, it.size,Toast.LENGTH_SHORT).show()
+        val uri = getPath(this,it[0])
+        getUri(uri,contentResolver, titleName)
+        Log.d("vvvvvvvv","nnnnnnn")
+    }
 
     init {
         controller = Controller(viewer = this)
@@ -36,11 +41,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(com.example.notepadmvcpattern.R.layout.activity_main)
 
-        appBarMain = findViewById(R.id.toolbar)
-        titleName = findViewById(R.id.titleName)
-        drawerLayout = findViewById(R.id.drawer_layout)
+        appBarMain = findViewById(com.example.notepadmvcpattern.R.id.toolbar)
+        titleName = findViewById(com.example.notepadmvcpattern.R.id.titleName)
+        drawerLayout = findViewById(com.example.notepadmvcpattern.R.id.drawer_layout)
 
         if (PermissionUtil.checkPermisssion(this))
 
@@ -51,8 +56,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             this,
             drawerLayout,
             appBarMain,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
+            com.example.notepadmvcpattern.R.string.navigation_drawer_open,
+            com.example.notepadmvcpattern.R.string.navigation_drawer_close
         )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
@@ -61,8 +66,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setOf(
             ), drawerLayout
         )
-        val navigationView: NavigationView = findViewById(R.id.nav_view)
+        val navigationView: NavigationView = findViewById(com.example.notepadmvcpattern.R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
+
+
     }
 
     @SuppressLint("MissingPermission")
@@ -93,25 +100,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id: Int = item.itemId
         when (id) {
-            R.id.nav_cart -> {
+            com.example.notepadmvcpattern.R.id.nav_cart -> {
 
             }
-            R.id.open -> {
+            com.example.notepadmvcpattern.R.id.open -> {
                 result.launch(false)
             }
-            R.id.save -> {
+            com.example.notepadmvcpattern.R.id.save -> {
 
             }
-            R.id.download -> {
+            com.example.notepadmvcpattern.R.id.download -> {
                 controller
             }
-            R.id.print -> {
+            com.example.notepadmvcpattern.R.id.print -> {
                 controller
             }
-            R.id.info -> {
+            com.example.notepadmvcpattern.R.id.info -> {
                 controller
             }
-            R.id.power -> {
+            com.example.notepadmvcpattern.R.id.power -> {
                 controller
             }
         }

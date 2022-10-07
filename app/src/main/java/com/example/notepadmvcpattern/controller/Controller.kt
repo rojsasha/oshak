@@ -1,7 +1,7 @@
 package com.example.notepadmvcpattern.controller
 
-import com.example.notepadmvcpattern.viewer.MainActivity
 import com.example.notepadmvcpattern.model.Model
+import com.example.notepadmvcpattern.viewer.MainActivity
 
 
 class Controller(){
@@ -11,6 +11,4 @@ class Controller(){
     constructor(viewer: MainActivity) : this() {
         model = Model(viewer = viewer)
     }
-
-
 }
