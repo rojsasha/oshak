@@ -1,9 +1,10 @@
 package com.example.notepadmvcpattern.viewer
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -12,12 +13,12 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.ui.AppBarConfiguration
 import com.example.notepadmvcpattern.controller.Controller
-import com.example.notepadmvcpattern.utils.FileUtils.getUri
 import com.example.notepadmvcpattern.utils.GetFileActivityResultContract
 import com.example.notepadmvcpattern.utils.PermissionUtil
 import com.example.notepadmvcpattern.utils.PermissionUtil.LOCATION_REQUEST_CODE
 import com.example.notepadmvcpattern.utils.getPath
 import com.google.android.material.navigation.NavigationView
+import java.io.*
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -27,29 +28,72 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var titleName: EditText
     private var controller: Controller
-    private val result = registerForActivityResult(GetFileActivityResultContract()){
+    private var uri: Uri? = null
+
+
+    private val result = registerForActivityResult(GetFileActivityResultContract()) {
 //        Toast.makeText(this, it.size,Toast.LENGTH_SHORT).show()
-        val uri = getPath(this,it[0])
-        getUri(uri,contentResolver, titleName)
-        Log.d("vvvvvvvv","nnnnnnn")
+        uri = it.firstOrNull()
+        val text = readTextFromUri(it.first())
+        setTextToEdit(text)
     }
 
     init {
         controller = Controller(viewer = this)
     }
 
+    private fun setTextToEdit(text: String) {
+        titleName.setText(text)
+    }
+
+    @Throws(IOException::class)
+    private fun readTextFromUri(uri: Uri): String {
+        val stringBuilder = StringBuilder()
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                var line: String? = reader.readLine()
+                while (line != null) {
+                    stringBuilder.append(line)
+                    line = reader.readLine()
+                }
+            }
+        }
+        return stringBuilder.toString()
+    }
+
+    private fun alterDocument(uri: Uri) {
+
+
+        try {
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            contentResolver.takePersistableUriPermission(uri, takeFlags)
+            contentResolver.openFileDescriptor(uri, "rwt")?.use {
+                FileOutputStream(it.fileDescriptor).use { file ->
+                    file.write(
+                        (titleName.text.toString()).toByteArray()
+                    )
+
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.notepadmvcpattern.R.layout.activity_main)
-
         appBarMain = findViewById(com.example.notepadmvcpattern.R.id.toolbar)
         titleName = findViewById(com.example.notepadmvcpattern.R.id.titleName)
         drawerLayout = findViewById(com.example.notepadmvcpattern.R.id.drawer_layout)
 
         if (PermissionUtil.checkPermisssion(this))
 
-        setSupportActionBar(appBarMain)
+            setSupportActionBar(appBarMain)
         appBarMain.title = "Меню"
 
         val toggle = ActionBarDrawerToggle(
@@ -66,7 +110,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setOf(
             ), drawerLayout
         )
-        val navigationView: NavigationView = findViewById(com.example.notepadmvcpattern.R.id.nav_view)
+        val navigationView: NavigationView =
+            findViewById(com.example.notepadmvcpattern.R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
 
@@ -107,7 +152,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 result.launch(false)
             }
             com.example.notepadmvcpattern.R.id.save -> {
-
+                uri?.let { alterDocument(it) }
             }
             com.example.notepadmvcpattern.R.id.download -> {
                 controller
