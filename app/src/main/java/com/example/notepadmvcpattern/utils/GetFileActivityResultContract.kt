@@ -19,7 +19,7 @@ class GetFileActivityResultContract: ActivityResultContract<Boolean, List<Uri>>(
     override fun createIntent(context: Context, input: Boolean): Intent {
         return Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("*/*")
+            .setType("text/plain")
             .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
     }
 
@@ -35,7 +35,7 @@ class SaveFileActivityResultContract: ActivityResultContract<Boolean, List<Uri>>
 
     override fun createIntent(context: Context, input: Boolean): Intent {
         return Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
+            addCategory(Intent.CATEGORY_OPENABLE).type = "text/plain"
             type = "application/txt"
             val name = System.currentTimeMillis().toString()
             putExtra(Intent.EXTRA_TITLE, "$name.txt")

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/nav_main"
+    <item android:id="@+id/nav_text_size"
           android:title="Text size"
         android:icon="@drawable/textsize"/>
 
-    <item android:id="@+id/nav_add"
+    <item android:id="@+id/nav_text_color"
         android:title="Text color"
         android:icon="@drawable/colortext"/>
 
-    <item android:id="@+id/nav_about"
+    <item android:id="@+id/nav_copy"
         android:title="Copy"
         android:icon="@drawable/copy"/>
 
-    <item android:id="@+id/nav_about_work"
-        android:title="Insert"
+    <item android:id="@+id/nav_paste"
+        android:title="Paste"
         android:icon="@drawable/insert"/>
 
 </menu>
