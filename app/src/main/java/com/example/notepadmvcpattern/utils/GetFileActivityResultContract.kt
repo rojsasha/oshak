@@ -31,6 +31,24 @@ class GetFileActivityResultContract: ActivityResultContract<Boolean, List<Uri>>(
 
 }
 
+class SaveFileActivityResultContract: ActivityResultContract<Boolean, List<Uri>>() {
+
+    override fun createIntent(context: Context, input: Boolean): Intent {
+        return Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/txt"
+            val name = System.currentTimeMillis().toString()
+            putExtra(Intent.EXTRA_TITLE, "$name.txt")
+        }
+    }
+
+    override fun parseResult(resultCode: Int, intent: Intent?): List<Uri> {
+        return if (intent == null || resultCode != Activity.RESULT_OK) {
+            emptyList()
+        } else getClipDataUris(intent)
+    }
+}
+
 fun getClipDataUris(intent: Intent): List<Uri> {
     val resultSet = HashSet<Uri>()
     intent.data?.let {

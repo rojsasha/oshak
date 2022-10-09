@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -16,7 +17,7 @@ import com.example.notepadmvcpattern.controller.Controller
 import com.example.notepadmvcpattern.utils.GetFileActivityResultContract
 import com.example.notepadmvcpattern.utils.PermissionUtil
 import com.example.notepadmvcpattern.utils.PermissionUtil.LOCATION_REQUEST_CODE
-import com.example.notepadmvcpattern.utils.getPath
+import com.example.notepadmvcpattern.utils.SaveFileActivityResultContract
 import com.google.android.material.navigation.NavigationView
 import java.io.*
 
@@ -30,12 +31,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var controller: Controller
     private var uri: Uri? = null
 
+    val CREATE_FILE = 1
 
-    private val result = registerForActivityResult(GetFileActivityResultContract()) {
+
+    private val getDocumentResult = registerForActivityResult(GetFileActivityResultContract()) {
 //        Toast.makeText(this, it.size,Toast.LENGTH_SHORT).show()
         uri = it.firstOrNull()
         val text = readTextFromUri(it.first())
         setTextToEdit(text)
+    }
+
+    private val saveDocumentResult = registerForActivityResult(SaveFileActivityResultContract()) {
+        uri = it.firstOrNull()
+        uri?.let { it1 -> alterDocument(it1) }
     }
 
     init {
@@ -61,9 +69,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return stringBuilder.toString()
     }
 
+//    private fun createFile(pickerInitialUri: Uri) {
+//        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+//            addCategory(Intent.CATEGORY_OPENABLE)
+//            type = "application/txt"
+//            putExtra(Intent.EXTRA_TITLE, "invoice.txt")
+//
+//            // Optionally, specify a URI for the directory that should be opened in
+//            // the system file picker before your app creates the document.
+//            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+//        }
+//        startActivityForResult(intent, CREATE_FILE)
+//    }
+
     private fun alterDocument(uri: Uri) {
-
-
         try {
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -149,13 +168,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             }
             com.example.notepadmvcpattern.R.id.open -> {
-                result.launch(false)
+                getDocumentResult.launch(false)
             }
             com.example.notepadmvcpattern.R.id.save -> {
                 uri?.let { alterDocument(it) }
             }
             com.example.notepadmvcpattern.R.id.download -> {
-                controller
+                saveDocumentResult.launch(false)
             }
             com.example.notepadmvcpattern.R.id.print -> {
                 controller
