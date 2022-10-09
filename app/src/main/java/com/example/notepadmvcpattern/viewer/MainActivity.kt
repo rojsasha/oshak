@@ -2,15 +2,12 @@ package com.example.notepadmvcpattern.viewer
 
 import android.annotation.SuppressLint
 import android.content.ClipData
-import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
@@ -39,7 +36,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var bottomNav: BottomNavigationView
     private var controller: Controller
     private var uri: Uri? = null
-    private var clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     private var pasteData: String = ""
 
 
@@ -58,6 +54,119 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     init {
         controller = Controller(viewer = this)
     }
+
+
+    @SuppressLint("MissingPermission")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        appBarMain = findViewById(R.id.toolbar)
+        titleName = findViewById(R.id.titleName)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        bottomNav = findViewById(R.id.bottomNav)
+        setupFrameLayot()
+        if (PermissionUtil.checkPermisssion(this))
+
+            setSupportActionBar(appBarMain)
+        appBarMain.title = "Меню"
+
+        val toggle = ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            appBarMain,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+            ), drawerLayout
+        )
+        val navigationView: NavigationView =
+            findViewById(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener(this)
+
+
+    }
+
+    override fun onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+
+    }
+
+    private fun setupFrameLayot() {
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_text_size -> {
+                    TextSizeDialog.newInstance(controller.getTextSize())
+                        .show(supportFragmentManager, "textSize")
+                }
+                R.id.nav_text_color -> {
+                    TextColorDialog.newInstance(controller.getTextColor())
+                        .show(supportFragmentManager, "textColor")
+                }
+                R.id.nav_copy -> {
+                    copyTextToClipboard()
+                }
+                R.id.nav_paste -> {
+                    pasteTextFromClipboard()
+                }
+            }
+            true
+        }
+    }
+
+    private fun pasteTextFromClipboard() {
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        titleName.setText(clipboardManager.primaryClip?.getItemAt(0)?.text)
+    }
+
+    private fun copyTextToClipboard() {
+        val textToCopy = titleName.text
+
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("text", textToCopy)
+        clipboardManager.setPrimaryClip(clipData)
+
+        Toast.makeText(this, "Text copied to clipboard", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val id: Int = item.itemId
+        when (id) {
+            R.id.nav_cart -> {
+                startActivity(
+                    Intent(this, MainActivity::class.java)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                )
+            }
+            R.id.open -> {
+                getDocumentResult.launch(false)
+            }
+            R.id.save -> {
+                uri?.let { alterDocument(it) }
+            }
+            R.id.download -> {
+                saveDocumentResult.launch(false)
+            }
+            R.id.print -> {
+            }
+            R.id.info -> {
+            }
+            R.id.power -> {
+                finish()
+            }
+        }
+        drawerLayout.closeDrawer(GravityCompat.START)
+        return false
+    }
+
 
     private fun setTextToEdit(text: String) {
         titleName.setText(text)
@@ -91,7 +200,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 }
             }
-            Toast.makeText(this, "Сохранено",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Сохранено", Toast.LENGTH_SHORT).show()
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -99,138 +208,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    @SuppressLint("MissingPermission")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        appBarMain = findViewById(R.id.toolbar)
-        titleName = findViewById(R.id.titleName)
-        drawerLayout = findViewById(R.id.drawer_layout)
-        bottomNav = findViewById(R.id.bottomNav)
-        setupFrameLayot()
-
-        if (PermissionUtil.checkPermisssion(this))
-
-            setSupportActionBar(appBarMain)
-        appBarMain.title = "Меню"
-
-        val toggle = ActionBarDrawerToggle(
-            this,
-            drawerLayout,
-            appBarMain,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-            ), drawerLayout
-        )
-        val navigationView: NavigationView =
-            findViewById(R.id.nav_view)
-        navigationView.setNavigationItemSelectedListener(this)
-
-
+    fun setTextColor(color: ColorsType) {
+        controller.setTextColor(color)
+        titleName.setTextColor(resources.getColor(color.value))
     }
 
-    @SuppressLint("MissingPermission")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                grantResults[1] == PackageManager.PERMISSION_GRANTED
-            ) {
-
-            }
-        }
-    }
-
-    override fun onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
-
-    }
-    private fun setupFrameLayot() {
-        bottomNav.setOnItemSelectedListener {
-            when(it.itemId){
-                R.id.nav_text_size-> {
-
-                }
-                R.id.nav_text_color-> {
-
-                }
-                R.id.nav_copy-> {
-                    textCopyThenPost(titleName.toString())
-//                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                    val clipS: ClipData = ClipData.newPlainText("simple text", "Hello, World!")
-//                    val copyUri: Uri = Uri.parse("$CONTACTS$COPY_PATH/$clipboard")
-//                    val clips: ClipData = ClipData.newUri(contentResolver, "URI", copyUri)
-//                    val appIntent = Intent(this, com.example.demo.myapplication::class.java)
-//                    val clip: ClipData = ClipData.newIntent("Intent", appIntent)
-//                    clipboard.setPrimaryClip(clips)
-                }
-                R.id.nav_paste-> {
-                    val item = clipboard.primaryClip?.getItemAt(0)
-
-                }
-            }
-            true
-        }
-    }
-    fun textCopyThenPost(textCopied:String) {
-        clipboard.setPrimaryClip(ClipData.newPlainText("", textCopied))
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
-            Toast.makeText(this, titleName.text, Toast.LENGTH_SHORT).show()
-    }
-    fun textPasteThenPost(){
-        bottomNav.isEnabled = when {
-            !clipboard.hasPrimaryClip() -> {
-                false
-            }
-            !(clipboard.primaryClipDescription?.hasMimeType(MIMETYPE_TEXT_PLAIN))!! -> {
-                false
-            }
-            else -> {
-                true
-            }
-        }
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val id: Int = item.itemId
-        when (id) {
-            R.id.nav_cart -> {
-
-            }
-            R.id.open -> {
-                getDocumentResult.launch(false)
-            }
-            R.id.save -> {
-                uri?.let { alterDocument(it) }
-            }
-            R.id.download -> {
-                saveDocumentResult.launch(false)
-            }
-            R.id.print -> {
-                controller
-            }
-            R.id.info -> {
-                controller
-            }
-            R.id.power -> {
-                controller
-            }
-        }
-        drawerLayout.closeDrawer(GravityCompat.START)
-        return false
+    fun setTextSize(textSize: Int) {
+        controller.setTextSize(textSize)
+        titleName.textSize = textSize.toFloat()
     }
 }

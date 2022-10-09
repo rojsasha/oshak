@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -19,8 +18,9 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="70dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="60dp"
+                android:layout_marginBottom="60dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:scrollbars="vertical">
@@ -32,22 +32,12 @@
                     <EditText
                         android:id="@+id/titleName"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginEnd="12dp"
                         android:hint="fgy"
-                        android:textSize="20sp" />
-
-                    <EditText
-                        android:id="@+id/contentName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/titleName"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="12dp"
-                        android:hint="hfgcgfcfuytfg"
+                        android:gravity="top"
                         android:textSize="20sp" />
 
                 </RelativeLayout>
@@ -71,5 +61,5 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-</androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
