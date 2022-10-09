@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -30,8 +31,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var titleName: EditText
     private var controller: Controller
     private var uri: Uri? = null
-
-    val CREATE_FILE = 1
 
 
     private val getDocumentResult = registerForActivityResult(GetFileActivityResultContract()) {
@@ -95,6 +94,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 }
             }
+            Toast.makeText(this, "Сохранено",Toast.LENGTH_SHORT).show()
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         } catch (e: IOException) {
